@@ -1,7 +1,10 @@
+import random
 # breaker = 0
 # global breaker
 
+
 def main():
+    print_cards(randomize(['card1', 'card2', 'card3', 'card4', 'card5']))
     first = get_arg('first')
     second = get_arg('second')
     action = get_action('action')
@@ -40,6 +43,16 @@ def math_it(first, second, a):
             return round(float(first / second), 2)
         case _:
             return 'bad luck'
+
+
+def randomize(array):
+    random.shuffle(array)
+    return array
+
+
+def print_cards(cards):
+    for card in cards:
+        print(card)
 
 
 main()
