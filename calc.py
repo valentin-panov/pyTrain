@@ -1,6 +1,7 @@
-import random
 # breaker = 0
 # global breaker
+from card_randomizer import randomize
+from card_randomizer import print_cards
 
 
 def main():
@@ -45,14 +46,5 @@ def math_it(first, second, a):
             return 'bad luck'
 
 
-def randomize(array):
-    random.shuffle(array)
-    return array
-
-
-def print_cards(cards):
-    for card in cards:
-        print(card)
-
-
-main()
+if __name__ == "__main__":
+    main()
