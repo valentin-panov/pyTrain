@@ -1,11 +1,4 @@
-# breaker = 0
-# global breaker
-from card_randomizer import randomize
-from card_randomizer import print_cards
-
-
-def main():
-    print_cards(randomize(['card1', 'card2', 'card3', 'card4', 'card5']))
+def calc():
     first = get_arg('first')
     second = get_arg('second')
     action = get_action('action')
@@ -47,4 +40,4 @@ def math_it(first, second, a):
 
 
 if __name__ == "__main__":
-    main()
+    calc()
