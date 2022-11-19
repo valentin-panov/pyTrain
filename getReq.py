@@ -1,5 +1,10 @@
 import sys
+
 import requests
+
+from file_interface import write_line
+
+
 # import json
 
 
@@ -11,6 +16,7 @@ def itunes_tracks():
     # print(json.dumps(res, indent=2))
     for result in res['results']:
         print(result['trackName'])
+        write_line('itunes_result.txt', result['trackName'])
 
 
 def arg_splitter(args):
