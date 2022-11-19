@@ -3,10 +3,6 @@ import requests
 # import json
 
 
-def main():
-    itunes_tracks()
-
-
 def itunes_tracks():
     if len(sys.argv) < 2:
         sys.exit("lack of arguments for iTunes: limit or term should be provided")
@@ -29,7 +25,6 @@ def arg_splitter(args):
                 term = el[1]
             case _:
                 break
-
     return f'https://itunes.apple.com/search?limit={count}&term={term}'
 
 
@@ -39,4 +34,4 @@ def api_fetcher(req):
 
 
 if __name__ == '__main__':
-    main()
+    itunes_tracks()
