@@ -1,8 +1,7 @@
+import csv
 import sys
 
 import requests
-
-from file_interface import write_line
 
 
 # import json
@@ -13,10 +12,26 @@ def itunes_tracks():
         sys.exit("lack of arguments for iTunes: limit or term should be provided")
     request_str = arg_splitter(sys.argv[1:])
     res = api_fetcher(request_str)
-    # print(json.dumps(res, indent=2))
-    for result in res['results']:
-        print(result['trackName'])
-        write_line('itunes_result.txt', result['trackName'])
+    with open('itunes_result.csv', 'a+', newline='') as file:
+        header_values = ["artistName", "trackName", "releaseDate", "trackTimeMillis"]
+        writer = csv.DictWriter(file, fieldnames=header_values)
+
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row != (','.join(header_values)):
+                writer.writeheader()
+            else:
+                print('HEADER ISN\'T DETECTED')
+                break
+
+        for result in res['results']:
+            try:
+                writer.writerow(
+                    {"artistName": result["artistName"], "trackName": result["trackName"],
+                     "releaseDate": result["releaseDate"],
+                     "trackTimeMillis": result["trackTimeMillis"]})
+            except UnicodeEncodeError:
+                sys.exit('encode error')
 
 
 def arg_splitter(args):
