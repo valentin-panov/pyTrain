@@ -10,28 +10,48 @@ def parse_audit():
         print(f'start parsing {source}')
         with open(source, 'r', encoding="utf-16") as in_, open('14_1_1.txt', 'w+') as out_:
             report = []
-            for line in in_:
-                entry = json.loads(line)
-                if entry["type"] == "auditAdvisory":
-                    new_entry = (f'. Package: {entry["data"]["advisory"]["module_name"]}, '
-                                 f'version: {entry["data"]["advisory"]["findings"][0]["version"]}, '
-                                 f'path: {entry["data"]["advisory"]["findings"][0]["paths"][0]} || '
-                                 f'Title: {entry["data"]["advisory"]["title"]} || '
-                                 f'CVSS score: {entry["data"]["advisory"]["cvss"]["score"]} || '
-                                 f'Patched versions: {entry["data"]["advisory"]["patched_versions"]} || '
-                                 f'Recommendation: {entry["data"]["advisory"]["recommendation"]} || '
-                                 f'URL: {entry["data"]["advisory"]["url"]} \n')
-                    if new_entry not in report:
-                        report.append(new_entry)
-            # here must be filter logic
+            for entry in in_:
+                source_line = json.loads(entry)
+                if source_line["type"] == "auditAdvisory":
+                    # get the package and patched
+                    report.append([source_line["data"]["advisory"]["module_name"],
+                                   source_line["data"]["advisory"]["patched_versions"].strip(">="),
+                                   f'. Package: {source_line["data"]["advisory"]["module_name"]}, '
+                                   f'Version: {source_line["data"]["advisory"]["findings"][0]["version"]}, '
+                                   f'Dependency of: '
+                                   f'{source_line["data"]["advisory"]["findings"][0]["paths"][0].split(">")[0]} || '
+                                   # f'Title: {entry["data"]["advisory"]["title"]} || '
+                                   # f'CVSS score: {entry["data"]["advisory"]["cvss"]["score"]} || '
+                                   f'Patched versions: {source_line["data"]["advisory"]["patched_versions"]} || '
+                                   # f'Recommendation: {source_line["data"]["advisory"]["recommendation"]} || '
+                                   # f'URL: {entry["data"]["advisory"]["url"]} '
+                                   f'\n'])
+
+            # go over the array and sort it
+            # for item in report:
+            #     print(item[1], "<=", new_report_line[1], (item[1] <= new_report_line[1]))
+            #     if (item[0] == new_report_line[0]) & (item[1] <= new_report_line[1]):
+            #         print('HAVE', item[0], item[1])
+            #     else:
+            #         add_entry(report, source_line, new_report_line)
+
+            # put the report in the output
             for idx, line in enumerate(report):
-                out_.write(f'{idx + 1}{line}')
-            print(f'Parsing {source} completed')
+                out_.write(f'{idx + 1}{line[2]}')
+            print(f'Parsing {source} completed. {len(report)} entries filed')
 
     except FileNotFoundError:
         sys.exit(f"file {source} doesn't exist")
     except json.decoder.JSONDecodeError as err:
         sys.exit(f'error parsing json: {err}')
+
+
+# def add_entry(arr, source_line, new_report_line):
+#     # create the report message and append it to the report line
+#
+#     # append the new line to the report
+#     arr.append(new_report_line)
+#     return arr
 
 
 def json_preparer(arg):
