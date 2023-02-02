@@ -26,18 +26,19 @@ def parse_audit():
             for entry in in_:
                 source_line = json.loads(entry)
                 if source_line["type"] == "auditAdvisory":
-                    # get the package and patched
+
+                    # get the package and patched version
                     pack_name = source_line["data"]["advisory"]["module_name"]
-                    package = Package(source_line["data"]["advisory"]["module_name"],
+                    package = Package(pack_name,
                                       source_line["data"]["advisory"]["patched_versions"].strip(">="),
-                                      f'. Package: {source_line["data"]["advisory"]["module_name"]}, '
+                                      f'. Package: {pack_name}, '
                                       f'Version: {source_line["data"]["advisory"]["findings"][0]["version"]}, '
                                       f'Dependency of: '
                                       f'{source_line["data"]["advisory"]["findings"][0]["paths"][0].split(">")[0]} || '
                                       f'Patched versions: {source_line["data"]["advisory"]["patched_versions"]}'
                                       f'\n')
-                    report_line = report.get(pack_name)
 
+                    report_line = report.get(pack_name)
                     if report_line:
                         print("for", report_line, 'same package found', package)
                         if version.parse(report_line.patched_versions) < version.parse(package.patched_versions):
