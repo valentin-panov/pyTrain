@@ -1,4 +1,6 @@
 import json
+import os
+import subprocess
 import sys
 
 from packaging import version
@@ -14,14 +16,25 @@ class Package:
         return f"{self.module_name}({self.patched_versions})"
 
 
+def parse_yarn(arg):
+    print('yarn audit initiated')
+    command = f"yarn audit --groups dependencies --json > {arg}"
+    subprocess.run(command, shell=True, text=False, capture_output=False)
+    print('yarn audit succeeded')
+
+
+def cleanup(arg):
+    os.remove(arg)
+
+
 def parse_audit():
-    if len(sys.argv) < 2:
-        sys.exit("lack of arguments for parse: filename must be provided")
-    source = arg_processor(sys.argv[1:])
+    source = 'temp.json'
+    output = '14_1_1.txt'
     try:
-        print(f'start parsing {source}')
+        parse_yarn(source)
+        print(f'start parsing')
         print('========================')
-        with open(source, 'r', encoding="utf-16") as in_, open('14_1_1.txt', 'w+') as out_:
+        with open(source, 'r', encoding="utf-8") as in_, open(output, 'w+') as out_:
             report = dict()
             for entry in in_:
                 source_line = json.loads(entry)
@@ -40,50 +53,29 @@ def parse_audit():
 
                     report_line = report.get(pack_name)
                     if report_line:
-                        print("for", report_line, 'same package found', package)
                         if version.parse(report_line.patched_versions) < version.parse(package.patched_versions):
-                            print(package, "higher versions found")
+                            print("for", report_line, 'package higher version', package, "founded")
                             report_line.patched_versions = package.patched_versions
                             report_line.description = package.description
                     else:
-                        print('new package found, append', package)
+                        print('vulnerable package found:', package)
                         report[pack_name] = package
 
             # put the report in the output
             for idx, line in enumerate(report.values()):
                 out_.write(f'{idx + 1}{line.description}')
             print('========================')
-            print(f'Parsing {source} completed. {len(report)} entries filed')
+            print(f'Parsing completed. {len(report)} entries filed in {output}')
+        cleanup(source)
 
     except FileNotFoundError:
         sys.exit(f"file {source} doesn't exist")
+    except UnicodeError as err:
+        sys.exit(f"{err}")
+    except PermissionError as err:
+        sys.exit(f"{err}")
     except json.decoder.JSONDecodeError as err:
         sys.exit(f'error parsing json: {err}')
-
-
-def arg_processor(args):
-    filename = '1'
-    for arg in args:
-        el = arg.split('=')
-        match el[0]:
-            case 'filename':
-                filename = el[1]
-            case _:
-                break
-    return f'{filename}.json'
-
-
-# trash stack
-def json_preparer(arg):
-    filewrite = open('out.json', 'w+')
-
-    with open(arg, 'r') as jsonFile:
-        for jf in jsonFile:
-            jf = jf.replace('\n', '')
-            jf = jf.strip()
-            filewrite.write(jf)
-
-    filewrite.close()
 
 
 # call protector
